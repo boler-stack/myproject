@@ -1,20 +1,18 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Hash, 
   Notebook, 
-  Cpu, 
-  Bot, 
-  Menu, 
-  X, 
-  Terminal as TerminalIcon 
+  Cpu,
+  Bot,
+  Terminal as TerminalIcon,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { clsx } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-const cn = (...inputs: any[]) => twMerge(clsx(inputs));
+const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
 const MainLayout: React.FC = () => {
   const location = useLocation();

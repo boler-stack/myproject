@@ -9,10 +9,10 @@ import {
   TrendingUp,
   Cloud
 } from 'lucide-react';
-import { clsx } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-const cn = (...inputs: any[]) => twMerge(clsx(inputs));
+const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
 interface StatCardProps {
   label: string;

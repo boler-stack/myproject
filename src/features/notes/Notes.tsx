@@ -1,26 +1,21 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Plus, 
   Search, 
   Trash2, 
-  Calendar,
-  MoreVertical,
   StickyNote,
-  X,
-  Pin,
-  PinOff,
   Sparkles,
   ChevronRight,
   Star,
   StarOff,
-  Check
+  MoreVertical
 } from 'lucide-react';
-import { clsx } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { getAIResponse } from '../../services/ai';
 
-const cn = (...inputs: any[]) => twMerge(clsx(inputs));
+const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
 interface Note {
   id: string;
@@ -62,7 +57,7 @@ const Notes: React.FC = () => {
     if (hasEmptyNotes) {
       setNotes(prev => prev.filter(n => n.title.trim() || n.content.trim() || n.id === activeNoteId));
     }
-  }, [activeNoteId]);
+  }, [activeNoteId, notes]);
 
   useEffect(() => {
     localStorage.setItem('smart-dash-notes-v2', JSON.stringify(notes));
@@ -132,7 +127,7 @@ const Notes: React.FC = () => {
       updateNote(activeNote.id, { 
         content: activeNote.content + "\n\n---\n**AI Summary:**\n" + summary 
       });
-    } catch (e) {
+    } catch {
       alert("AI Service unavailable.");
     } finally {
       setIsAISummarizing(false);
@@ -260,7 +255,7 @@ const Notes: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <select 
                     value={activeNote.category}
-                    onChange={(e) => updateNote(activeNote.id, { category: e.target.value as any })}
+                    onChange={(e) => updateNote(activeNote.id, { category: e.target.value as Note['category'] })}
                     className="bg-orange-500/10 border border-orange-500/20 rounded-xl px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-orange-500 outline-none hover:bg-orange-500/20 transition-all cursor-pointer"
                   >
                     {CATEGORIES.map(cat => <option key={cat} value={cat} className="bg-[#0f0f0f]">{cat}</option>)}

@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { 
   Hash, 
   Copy, 
@@ -10,22 +10,21 @@ import {
   Code2,
   List
 } from 'lucide-react';
-import { clsx } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { BaseFormats, BaseType, convertValue, isValidForBase } from '../../utils/converterUtils';
+import { BaseFormats, type BaseType, convertValue, isValidForBase } from '../../utils/converterUtils';
 
-const cn = (...inputs: any[]) => twMerge(clsx(inputs));
+const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
 interface BaseInputProps {
   label: string;
   value: string;
-  base: number;
   icon: React.ElementType;
   onChange: (val: string) => void;
   error?: boolean;
 }
 
-const BaseInput: React.FC<BaseInputProps> = ({ label, value, base, icon: Icon, onChange, error }) => {
+const BaseInput: React.FC<BaseInputProps> = ({ label, value, icon: Icon, onChange, error }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -134,7 +133,6 @@ const Converter: React.FC = () => {
         <BaseInput 
           label="Decimal" 
           value={values.DECIMAL} 
-          base={10} 
           icon={Hash}
           onChange={(val) => handleInputChange('DECIMAL', val)}
           error={errorBase === 'DECIMAL'}
@@ -142,7 +140,6 @@ const Converter: React.FC = () => {
         <BaseInput 
           label="Hexadecimal" 
           value={values.HEXADECIMAL} 
-          base={16} 
           icon={Code2}
           onChange={(val) => handleInputChange('HEXADECIMAL', val)}
           error={errorBase === 'HEXADECIMAL'}
@@ -150,7 +147,6 @@ const Converter: React.FC = () => {
         <BaseInput 
           label="Binary" 
           value={values.BINARY} 
-          base={2} 
           icon={Binary}
           onChange={(val) => handleInputChange('BINARY', val)}
           error={errorBase === 'BINARY'}
@@ -158,7 +154,6 @@ const Converter: React.FC = () => {
         <BaseInput 
           label="Octal" 
           value={values.OCTAL} 
-          base={8} 
           icon={List}
           onChange={(val) => handleInputChange('OCTAL', val)}
           error={errorBase === 'OCTAL'}

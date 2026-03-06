@@ -15,11 +15,11 @@ import {
   Edit2,
   Check
 } from 'lucide-react';
-import { clsx } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { getAIResponse } from '../../services/ai';
 
-const cn = (...inputs: any[]) => twMerge(clsx(inputs));
+const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
 interface Message {
   id: string;
@@ -43,8 +43,8 @@ const AIChat: React.FC = () => {
     if (saved) {
       try {
         return JSON.parse(saved);
-      } catch (e) {
-        console.error("Failed to parse saved conversations", e);
+      } catch {
+        console.error("Failed to parse saved conversations");
       }
     }
     return [];
@@ -56,7 +56,7 @@ const AIChat: React.FC = () => {
       try {
         const parsed = JSON.parse(saved);
         return parsed.length > 0 ? parsed[0].id : null;
-      } catch (e) { return null; }
+      } catch { return null; }
     }
     return null;
   });
@@ -96,12 +96,13 @@ const AIChat: React.FC = () => {
     if (hasEmptyChats) {
       setConversations(prev => prev.filter(c => c.messages.length > 1 || c.id === activeId));
     }
-  }, [activeId]);
+  }, [activeId, conversations]);
 
   useEffect(() => {
     if (conversations.length === 0) {
       createNewChat();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -228,11 +229,12 @@ const AIChat: React.FC = () => {
         }
         return conv;
       }));
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessageContent = error instanceof Error ? error.message : "Failed to connect to Groq.";
       const errorMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: `Error: ${error.message || "Failed to connect to Groq."}`,
+        content: `Error: ${errorMessageContent}`,
         timestamp: Date.now(),
       };
       setConversations(prev => prev.map(conv => {

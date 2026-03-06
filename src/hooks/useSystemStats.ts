@@ -24,6 +24,41 @@ interface SystemStats {
   };
 }
 
+// Add interfaces for non-standard APIs
+interface BatteryManager extends EventTarget {
+  charging: boolean;
+  chargingTime: number;
+  dischargingTime: number;
+  level: number;
+  onchargingchange: EventListener | null;
+  onlevelchange: EventListener | null;
+}
+
+interface NetworkInformation extends EventTarget {
+  readonly type?: string;
+  readonly effectiveType?: string;
+  readonly downlink?: number;
+  readonly rtt?: number;
+  onchange: EventListener | null;
+}
+
+interface PerformanceMemory {
+  usedJSHeapSize: number;
+  totalJSHeapSize: number;
+  jsHeapSizeLimit: number;
+}
+
+interface ExtendedNavigator extends Navigator {
+  getBattery?: () => Promise<BatteryManager>;
+  connection?: NetworkInformation;
+  mozConnection?: NetworkInformation;
+  webkitConnection?: NetworkInformation;
+}
+
+interface ExtendedPerformance extends Performance {
+  memory?: PerformanceMemory;
+}
+
 export const useSystemStats = () => {
   const [stats, setStats] = useState<SystemStats>({
     battery: { level: 0, charging: false, supported: false },
@@ -34,8 +69,10 @@ export const useSystemStats = () => {
 
   useEffect(() => {
     // Battery API
-    if ('getBattery' in navigator) {
-      (navigator as any).getBattery().then((battery: any) => {
+    const nav = navigator as ExtendedNavigator;
+    
+    if ('getBattery' in navigator && nav.getBattery) {
+      nav.getBattery().then((battery: BatteryManager) => {
         const updateBattery = () => {
           setStats(prev => ({
             ...prev,
@@ -53,7 +90,7 @@ export const useSystemStats = () => {
     }
 
     // Network API
-    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
     if (connection) {
       const updateNetwork = () => {
         setStats(prev => ({
@@ -70,13 +107,11 @@ export const useSystemStats = () => {
       connection.addEventListener('change', updateNetwork);
     }
 
-    // Storage API - Improved handling
+    // Storage API
     const updateStorage = async () => {
       if ('storage' in navigator && 'estimate' in navigator.storage) {
         try {
           const estimate = await navigator.storage.estimate();
-          // Browsers often report 0 for usage if it's very small. 
-          // We'll show a minimum of 1KB if usage exists but is tiny to avoid "0 B" confusion.
           const realUsage = estimate.usage || 0;
           setStats(prev => ({
             ...prev,
@@ -93,22 +128,32 @@ export const useSystemStats = () => {
     };
     updateStorage();
 
-    // Memory API
-    if ('memory' in performance) {
-      const memory = (performance as any).memory;
-      setStats(prev => ({
-        ...prev,
-        memory: {
-          usedJSHeapSize: memory.usedJSHeapSize,
-          totalJSHeapSize: memory.totalJSHeapSize,
-          supported: true
+    // Memory API (Chrome specific)
+    const updateMemory = () => {
+      if ('memory' in performance) {
+        const perf = performance as ExtendedPerformance;
+        if (perf.memory) {
+          const memory = perf.memory;
+          setStats(prev => ({
+            ...prev,
+            memory: {
+              usedJSHeapSize: memory.usedJSHeapSize,
+              totalJSHeapSize: memory.totalJSHeapSize,
+              supported: true
+            }
+          }));
         }
-      }));
-    }
+      }
+    };
+    updateMemory();
 
-    // Poll storage occasionally as it doesn't have a listener
-    const storageInterval = setInterval(updateStorage, 10000);
-    return () => clearInterval(storageInterval);
+    // Polling for storage and memory
+    const intervalId = setInterval(() => {
+      updateStorage();
+      updateMemory();
+    }, 5000); // Poll every 5s
+
+    return () => clearInterval(intervalId);
   }, []);
 
   return stats;

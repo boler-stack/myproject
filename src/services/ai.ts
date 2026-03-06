@@ -35,7 +35,7 @@ export const getAIResponse = async (prompt: string, history: { role: "user" | "a
     });
 
     return completion.choices[0]?.message?.content || "No response received.";
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Groq AI API Error:", error);
     throw error;
   }

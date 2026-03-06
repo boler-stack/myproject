@@ -7,16 +7,13 @@ import {
   HardDrive, 
   Cpu, 
   ShieldCheck,
-  AlertTriangle,
-  Zap,
-  Activity,
-  ArrowDown
+  Activity
 } from 'lucide-react';
-import { clsx } from 'clsx';
+import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useSystemStats } from '../../hooks/useSystemStats';
 
-const cn = (...inputs: any[]) => twMerge(clsx(inputs));
+const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs));
 
 const MetricCard: React.FC<{
   title: string;
